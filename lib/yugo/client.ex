@@ -114,18 +114,21 @@ defmodule Yugo.Client do
 
   @impl true
   def init(args) do
+    IO.inspect ["init", args]
     send(self(), {:do_init, args})
     {:ok, nil}
   end
 
   @impl true
   def terminate(_reason, conn) do
+    IO.inspect ["terminate", _reason]
     conn
     |> send_command("LOGOUT")
   end
 
   @impl true
   def handle_cast({:subscribe, pid, filter}, conn) do
+    IO.inspect ["handle_cast", {:subscribe, pid, filter}]
     conn =
       %{conn | filters: [{filter, pid} | conn.filters]}
       |> update_attrs_needed_by_filters()
@@ -135,6 +138,7 @@ defmodule Yugo.Client do
 
   @impl true
   def handle_cast({:unsubscribe, pid}, conn) do
+    IO.inspect ["handle_cast", {:unsubscribe, pid}]
     conn =
       %{conn | filters: Enum.reject(conn.filters, &(elem(&1, 1) == pid))}
       |> update_attrs_needed_by_filters()
@@ -189,12 +193,14 @@ defmodule Yugo.Client do
   @impl true
   def handle_info({close_message, _sock}, conn)
       when close_message in [:tcp_closed, :ssl_closed] do
+    IO.inspect ["handle_info close_message", close_message]
     {:stop, :normal, conn}
   end
 
   @noop_poll_interval 5000
   @impl true
   def handle_info(:poll_with_noop, conn) do
+    IO.inspect ["handle_info poll_with_noop", conn]
     Process.send_after(self(), :poll_with_noop, @noop_poll_interval)
 
     conn =
@@ -211,6 +217,7 @@ defmodule Yugo.Client do
   @idle_timeout 1000 * 60 * 27
   @impl true
   def handle_info(:idle_timeout, conn) do
+    IO.inspect ["handle_info idle_timeout", conn]
     conn =
       %{conn | idle_timed_out: true}
       |> cancel_idle()
@@ -309,6 +316,7 @@ defmodule Yugo.Client do
   end
 
   defp do_login(conn) do
+    IO.inspect ["do_login", conn]
     conn
     |> send_command(
       "LOGIN #{quote_string(conn.username)} #{quote_string(conn.password)}",
@@ -342,12 +350,14 @@ defmodule Yugo.Client do
 
   # starts NOOP polling unless the server supports IDLE
   defp maybe_noop_poll(conn) do
+    IO.inspect ["maybe_noop_poll", conn]
     send(self(), :poll_with_noop)
 
     conn
   end
 
   defp on_idle_response(conn, :ok, _text) do
+    IO.inspect ["on_idle_response", conn]
     if conn.idle_timed_out do
       maybe_idle(conn)
     else
@@ -357,6 +367,7 @@ defmodule Yugo.Client do
 
   # IDLEs if there is no command in progress, we're not already idling, and the server supports IDLE
   defp maybe_idle(conn) do
+    IO.inspect ["maybe_idle", conn]
     if "IDLE" in conn.capabilities and not command_in_progress?(conn) and not conn.idling do
       timer = Process.send_after(self(), :idle_timeout, @idle_timeout)
 
@@ -368,6 +379,7 @@ defmodule Yugo.Client do
   end
 
   defp cancel_idle(conn) do
+    IO.inspect ["cancel_idle", conn]
     Process.cancel_timer(conn.idle_timer)
 
     %{conn | idling: false, idle_timer: nil}
@@ -636,6 +648,7 @@ defmodule Yugo.Client do
     do: conn |> apply_action(action) |> apply_actions(rest)
 
   defp send_raw(conn, stuff) do
+    IO.inspect ["send_raw", stuff]
     if conn.tls do
       :ssl.send(conn.socket, stuff)
     else
