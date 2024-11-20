@@ -342,9 +342,7 @@ defmodule Yugo.Client do
 
   # starts NOOP polling unless the server supports IDLE
   defp maybe_noop_poll(conn) do
-    unless "IDLE" in conn.capabilities do
-      send(self(), :poll_with_noop)
-    end
+    send(self(), :poll_with_noop)
 
     conn
   end
