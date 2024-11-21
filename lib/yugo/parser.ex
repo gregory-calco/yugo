@@ -49,6 +49,9 @@ defmodule Yugo.Parser do
     data = String.replace_suffix(data, "\r\n", "")
 
     case data do
+      <<"* FLAGS", rest::binary>> ->
+        [:continuation]
+
       <<"* ", rest::binary>> ->
         parse_untagged(rest)
 
