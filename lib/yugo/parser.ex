@@ -77,6 +77,7 @@ defmodule Yugo.Parser do
       "bad" -> :bad
       "preauth" -> :preauth
       "bye" -> :bye
+      "flags" -> :flags
     end
   end
 
