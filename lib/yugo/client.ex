@@ -274,6 +274,7 @@ defmodule Yugo.Client do
   end
 
   defp handle_packet(data, conn) do
+    IO.inspect ["handle_packet", data, conn]
     if conn.got_server_greeting do
       actions = Parser.parse_response(data)
 
