@@ -552,7 +552,7 @@ defmodule Yugo.Client do
 
       {:num_exists, num} ->
         conn =
-          if conn.num_exists < num do
+          if (conn.num_exists || 0) < num do
             %{
               conn
               | unprocessed_messages:
