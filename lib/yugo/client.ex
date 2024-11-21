@@ -443,6 +443,8 @@ defmodule Yugo.Client do
         conn
         |> send_command("STORE #{seqnum} +FLAGS (\\Seen)")
         conn
+        |> send_command("CAPABILITY")
+        conn
         |> release_message(seqnum)
     end
   end
