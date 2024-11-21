@@ -335,6 +335,10 @@ defmodule Yugo.Client do
     |> send_command("CAPABILITY", &on_authed_capability_response/3)
   end
 
+  defp on_draft(_, _, _) do
+    false
+  end
+
   defp on_authed_capability_response(conn, :ok, _text) do
     conn
     |> send_command("SELECT #{quote_string(conn.mailbox)}", &on_select_response/3)
@@ -441,9 +445,9 @@ defmodule Yugo.Client do
 
       msg.fetched == :full ->
         conn
-        |> send_command("STORE #{seqnum} +FLAGS (\\Seen)")
+        |> send_command("STORE #{seqnum} +FLAGS (\\Seen)", &on_draft/3)
         conn
-        |> send_command("CAPABILITY")
+        |> send_command("CAPABILITY", &on_draft/3)
         conn
         |> release_message(seqnum)
     end
