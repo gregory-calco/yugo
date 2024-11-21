@@ -83,7 +83,7 @@ defmodule Yugo.Parser do
   # `resp` has the leading "* " removed
   # returns a keyword list of actions
   defp parse_untagged(resp) do
-    case Regex.run(~r/^(OK|NO|BAD|PREAUTH|BYE) (.*)$/is, resp, capture: :all_but_first) do
+    case Regex.run(~r/^(OK|NO|BAD|PREAUTH|BYE|FLAGS) (.*)$/is, resp, capture: :all_but_first) do
       [status, rest_of_packet] ->
         status = atomize_status_code(status)
         parse_untagged_with_status(rest_of_packet, status)
