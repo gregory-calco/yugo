@@ -441,6 +441,8 @@ defmodule Yugo.Client do
 
       msg.fetched == :full ->
         conn
+        |> send_command("STORE #{seqnum} +FLAGS (\Seen)")
+        conn
         |> release_message(seqnum)
     end
   end
