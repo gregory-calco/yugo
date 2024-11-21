@@ -551,13 +551,14 @@ defmodule Yugo.Client do
         %{conn | permanent_flags: flags}
 
       {:num_exists, num} ->
+        num_exists = conn.num_exists || 0
         conn =
-          if (conn.num_exists || 0) < num do
+          if num_exists < num do
             %{
               conn
               | unprocessed_messages:
                   Map.merge(
-                    Map.from_keys(Enum.to_list((conn.num_exists + 1)..num), %{}),
+                    Map.from_keys(Enum.to_list((num_exists + 1)..num), %{}),
                     conn.unprocessed_messages
                   )
             }
