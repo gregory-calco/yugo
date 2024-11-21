@@ -551,14 +551,20 @@ defmodule Yugo.Client do
         %{conn | permanent_flags: flags}
 
       {:num_exists, num} ->
+        %{conn | num_exists: num}
+
+      {:num_recent, num} ->
+        %{conn | num_recent: num}
+
+      {:first_unseen, num} ->
         num_exists = conn.num_exists || 0
         conn =
-          if num_exists < num do
+          if num_exists > num do
             %{
               conn
               | unprocessed_messages:
                   Map.merge(
-                    Map.from_keys(Enum.to_list((num_exists + 1)..num), %{}),
+                    Map.from_keys(Enum.to_list((num_exists)..num), %{}),
                     conn.unprocessed_messages
                   )
             }
@@ -566,12 +572,6 @@ defmodule Yugo.Client do
             conn
           end
 
-        %{conn | num_exists: num}
-
-      {:num_recent, num} ->
-        %{conn | num_recent: num}
-
-      {:first_unseen, num} ->
         %{conn | first_unseen: num}
 
       {:uid_validity, num} ->
@@ -580,24 +580,8 @@ defmodule Yugo.Client do
       {:uid_next, num} ->
         %{conn | uid_next: num}
 
-      {:expunge, expunged_num} ->
-        %{
-          conn
-          | num_exists: conn.num_exists - 1,
-            unprocessed_messages:
-              conn.unprocessed_messages
-              |> Enum.reject(fn {k, _v} -> k == expunged_num end)
-              |> Enum.map(fn {k, v} ->
-                cond do
-                  expunged_num < k ->
-                    {k - 1, v}
-
-                  expunged_num > k ->
-                    {k, v}
-                end
-              end)
-              |> Map.new()
-        }
+      {:expunge, _expunged_num} ->
+        conn
 
       {:fetch, {seq_num, :flags, flags}} ->
         if Map.has_key?(conn.unprocessed_messages, seq_num) do
