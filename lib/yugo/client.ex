@@ -557,14 +557,13 @@ defmodule Yugo.Client do
         %{conn | num_recent: num}
 
       {:first_unseen, num} ->
-        num_exists = conn.num_exists || 0
         conn =
-          if num_exists > num do
+          if !is_nil(num) and (conn.first_unseen != num) do
             %{
               conn
               | unprocessed_messages:
                   Map.merge(
-                    Map.from_keys(Enum.to_list((num_exists)..num), %{}),
+                    Map.from_keys([num], %{}),
                     conn.unprocessed_messages
                   )
             }
