@@ -446,9 +446,9 @@ defmodule Yugo.Client do
 
       msg.fetched == :full ->
         conn
-        |> send_command("STORE #{seqnum} +FLAGS (\\Seen)", &on_draft/3)
+        |> send_command("STORE #{seqnum} +FLAGS (\\Seen)")
         conn
-        |> send_command("CAPABILITY", &on_draft/3)
+        |> send_command("SELECT #{quote_string(conn.mailbox)}", &on_select_response/3)
         conn
         |> release_message(seqnum)
     end
