@@ -120,6 +120,9 @@ defmodule Yugo.Client do
 
   @impl true
   def terminate(_reason, conn) do
+    for {_, pid} <- conn.filters do
+      send(pid, {:terminate, conn.my_name})
+    end
     conn
     |> send_command("LOGOUT")
   end
